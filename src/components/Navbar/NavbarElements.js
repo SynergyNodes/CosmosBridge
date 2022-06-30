@@ -7,10 +7,10 @@ background: rgba(22,23,33,.75);
 border-radius: 1rem;
 box-shadow: 2px 2px 10px #16172159;
 border: 1px solid rgba(96,125,139,.25);
-height: 85px;
+height: 55px;
 display: flex;
 justify-content: space-between;
-padding: 0.2rem calc((100vw - 1000px) / 2);
+padding: 0.2rem calc((100vw - 900px) / 2);
 z-index: 12;
 `;
 

@@ -9,12 +9,16 @@ const Avax_USDC = () => {
   const [chainID, setChainID] = useState();
   const [allowance, setAllowance] = useState();
   const [submitVal, setSubmitVal] = useState('');
+  const [address, setAddress] = useState('');
   const [balance, setBalance] = useState();
   const [depositValue, setDepositValue] = useState('');
   const [depositAddressValue, setDepositAddressValue] = useState('');
   const [destinationAddressValue, setDestinationAddressValue] = useState('');
+  const [txValue, setTxValue] = useState('');
   const [approve, setApprove] = useState(false);
-  const [error,setError]=useState(false);
+  const [execute, setExecute] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
   const [curveReturn, setCurveReturn] = useState(0);
   const [axelarFee, setAxelarFee] = useState(0);
   const [expected, setExpected] = useState(0);
@@ -35,12 +39,17 @@ const Avax_USDC = () => {
       console.log(`ChainID = ${chainId}`);
       setChainID(chainId);
       if(chainId == 43114)
+      {
         await provider.send("eth_requestAccounts", []);
-    }
+        getBalance();
+      }
+    } 
 
     const getBalance = async () => {
       const balance = await tokenContract.balanceOf(signer.getAddress());
       console.log(`Balance : ${balance}`);
+      const address = await signer.getAddress();
+      setAddress(address);
       setBalance(ethers.utils.formatUnits(balance.toString(), "mwei"));
     }
 
@@ -65,14 +74,15 @@ const Avax_USDC = () => {
     setDepositValue(e.target.value);
     const curveReturn = await curveContract.get_dy(1, 0, ethers.utils.parseUnits(e.target.value, 6).toString());
     const tempCurve = ethers.utils.formatUnits(curveReturn.toString(), "mwei");
-    //const finalCurve = tempCurve - (tempCurve / 100);
-    const finalCurve = tempCurve;
+    const finalCurve = tempCurve - (tempCurve / 1000);
     setCurveReturn(parseFloat(finalCurve).toFixed(2));
-    let response = await fetch('https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=avalanche&destination_chain=terra&amount=' + ethers.utils.parseUnits(e.target.value, 6).toString() + 'uausdc');
+    let response = await fetch('https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=avalanche&destination_chain=osmosis&amount=' + ethers.utils.parseUnits(e.target.value, 6).toString() + 'uusdc');
     let responseJson = await response.json();
-    console.log("AxelarFee = ", responseJson.fee.amount);
-    setAxelarFee(parseFloat(ethers.utils.formatUnits(responseJson.fee.amount.toString(), "mwei")).toFixed(2));
-    const expected = finalCurve - ethers.utils.formatUnits(responseJson.fee.amount.toString(), "mwei");
+    let axelarFee = responseJson.fee.amount;
+    console.log("AxelarFee = ", axelarFee);
+    if(axelarFee == 0) axelarFee = 1500000;
+    setAxelarFee(parseFloat(ethers.utils.formatUnits(axelarFee.toString(), "mwei")).toFixed(2));
+    const expected = finalCurve - ethers.utils.formatUnits(axelarFee.toString(), "mwei");
     setExpected(parseFloat(expected).toFixed(2));
   }
 
@@ -87,10 +97,12 @@ const Avax_USDC = () => {
   const handleMax = async (e) => {
     e.preventDefault();
     setDepositValue(balance);
-    let response = await fetch('https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=avalanche&destination_chain=terra&amount=' + ethers.utils.parseUnits(balance, 6).toString() + 'uausdc');
+    let response = await fetch('https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=avalanche&destination_chain=osmosis&amount=' + ethers.utils.parseUnits(balance, 6).toString() + 'uusdc');
     let responseJson = await response.json();
-    console.log("AxelarFee = ", responseJson.fee.amount);
-    setAxelarFee(ethers.utils.formatUnits(responseJson.fee.amount.toString(), "mwei"));
+    let axelarFee = responseJson.fee.amount;
+    console.log("AxelarFee = ", axelarFee);
+    if(axelarFee == 0) axelarFee = 1500000;
+    setAxelarFee(ethers.utils.formatUnits(axelarFee.toString(), "mwei"));
     setExpected(0);
   }  
 
@@ -105,7 +117,7 @@ const Avax_USDC = () => {
       setApprove(true); 
       console.log(depositValue);
       const tokenVal = ethers.utils.parseUnits(depositValue, 6);
-      const result = await tokenContract.approve(curveContract, tokenVal);
+      const result = await tokenContract.approve(curveAddress, tokenVal);
       await result.wait();
       //const balance = await provider.getBalance(tokenAddress);
       //const balanceFormatted = ethers.utils.formatEther(balance);
@@ -121,15 +133,21 @@ const Avax_USDC = () => {
       setError(true)
     }
     else
-    {    
-      console.log(depositValue);
-      const ethValue = ethers.utils.parseEther(depositValue);
-      const depositEth = await tokenContract.deposit({ value: ethValue });
-      await depositEth.wait();
-      const balance = await provider.getBalance(tokenAddress);
-      const balanceFormatted = ethers.utils.formatEther(balance);
-      setBalance(balanceFormatted);
-      setDepositValue(0);
+    {
+      setExecute(true);
+      const dx = ethers.utils.parseUnits(depositValue, 6);
+      const min_dy = ethers.utils.parseUnits(curveReturn, 6);
+      
+      try {
+        const result = await curveContract.exchange(1, 0, dx, min_dy, depositAddressValue);
+        await result.wait();
+        setSuccess(true);
+        setTxValue('https://snowtrace.io/tx/' + result.hash);
+        console.log("txValue = ", result.hash);
+      } catch (error) {
+        console.error(error);
+      }
+
     }
   }
 
@@ -138,14 +156,14 @@ const Avax_USDC = () => {
     e.preventDefault();
     console.log(depositAddressValue);
     const sdk = new AxelarAssetTransfer({
-      environment: "testnet",
+      environment: "mainnet",
       auth: "local",
     });
     const result = await sdk.getDepositAddress(
       "avalanche", // source chain
-      "kujira", // destination chain
+      "osmosis", // destination chain
       destinationAddressValue, // destination address
-      "wavax-wei" // asset to transfer
+      "uusdc" // asset to transfer
     );
     setDepositAddressValue(result);
     setSubmitVal("done");
@@ -157,16 +175,28 @@ const Avax_USDC = () => {
           { chainID == "43114" ? <div className='network_correct'>Avalanche Mainnet</div> : <div className='network_wrong'>Wrong Network. Please choose Avalanche mainnet and reload this page.</div> }
             <div className='forms'>
             <h3>Crosschain Bridge to Kujira</h3>
+            <p><b>Your Address:</b> {address}</p>
             <p><b>USDC.e Balance:</b> {balance} USDC.e</p>
             <p><b>Kujira Address:</b> {destinationAddressValue}</p>
-            <p><b>Deposit Address:</b> {depositAddressValue}</p> 
-            <p><b>Deposit Value:</b> {depositValue}</p>
+            <p><b>Deposit Address:</b> {depositAddressValue}</p>
 
             <p className='fees'><span className='secOne'><b>Expected from Curve:</b> {curveReturn} axlUSDC</span><span className='secTwo'><b>Axelar Fees:</b> {axelarFee} USDC</span></p>
             <hr></hr>
             <p className='expected'><b>Expected at Destination:</b> {expected} USDC </p>
             <p className='note'><b>NOTE:</b> Final amount may vary at Destination</p>
             <hr></hr>
+
+            { success ? 
+              <div className='success'>
+                <p className='head'>Success!</p>
+                <p className='body'><a href={txValue} target="_blank">Click Here for Avalanche Tx Details</a></p>
+                <p className="body">You will received USDC to Your Kujira Wallet in 5 minutes.</p>
+                <hr></hr>              
+              </div>
+
+              : "" }
+
+
 
             <form onSubmit={handleDepositSubmit} >
               <div className="mb-3">
@@ -203,7 +233,7 @@ const Avax_USDC = () => {
                 {error ? <div className='error'>Please Enter Correct Value</div> : ""}
                 <a href='#' onClick={handleMax} className="max">Max: {balance} USDC.e</a>
               </div>
-              {(allowance >= balance? <button type="submit" className="btn btn-success">Execute</button>: <button type="button" disabled={approve ? true : false } onClick={handleApprove} className="btn btn-success">Approve</button>)}
+              {(allowance >= depositValue? <button type="submit" disabled={execute ? true : false } className="btn btn-success">Execute</button>: <button type="button" disabled={approve ? true : false } onClick={handleApprove} className="btn btn-success">Approve</button>)}
             </form>
             
             </div>

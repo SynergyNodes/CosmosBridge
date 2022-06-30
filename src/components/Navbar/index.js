@@ -6,6 +6,7 @@ const Navbar = () => {
 return (
 	<>
 	<div className="header">
+		####### Testing - DO NOT USE ####### <br></br>
 		Crosschain Bridge by SynergyNodes.com
 		<p>Powered by <a href="https://axelar.network" target="_blank">Axelar</a></p>
 	</div>
@@ -14,17 +15,8 @@ return (
 		<NavLink to="/avalanche" activeStyle>
 			Avalanche
 		</NavLink>		
-		<NavLink to="/about" activeStyle>
-			About
-		</NavLink>
 		<NavLink to="/contact" activeStyle>
-			Contact Us
-		</NavLink>
-		<NavLink to="/blogs" activeStyle>
-			Blogs
-		</NavLink>
-		<NavLink to="/sign-up" activeStyle>
-			Sign Up
+			Contact Info
 		</NavLink>
 		</NavMenu>
 	</Nav>

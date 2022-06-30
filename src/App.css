@@ -20,6 +20,15 @@ div.header p {
   padding:5px;
 }
 
+div.success {
+  align-items: center;
+  text-align: center;
+}
+
+div p.head {
+  font-size:30px;
+}
+
 div.network_wrong {
   background: #d57979;
   border-radius: 1rem;
@@ -81,6 +90,20 @@ ol {
   margin-right:auto;
   margin-bottom: 20px;
   color: #ffffff;
+}
+
+.contact {
+  margin-top:30px !important;
+}
+
+.contact p {
+  text-align: center;
+  font-size: 18px;
+}
+
+.contact p a {
+  color:#60fbd0;
+  text-decoration: none;
 }
 
 .forms p {
