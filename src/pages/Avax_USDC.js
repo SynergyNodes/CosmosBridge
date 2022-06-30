@@ -1,0 +1,232 @@
+import React, { useState, useEffect } from 'react';
+import { ethers } from "ethers";
+import { AxelarAssetTransfer } from '@axelar-network/axelarjs-sdk'
+import tokenABI from '../components/abi/tokenABI.json'
+import curveABI from '../components/abi/curveABI.json'
+
+const Avax_USDC = () => {
+
+  const [chainID, setChainID] = useState();
+  const [allowance, setAllowance] = useState();
+  const [submitVal, setSubmitVal] = useState('');
+  const [balance, setBalance] = useState();
+  const [depositValue, setDepositValue] = useState('');
+  const [depositAddressValue, setDepositAddressValue] = useState('');
+  const [destinationAddressValue, setDestinationAddressValue] = useState('');
+  const [approve, setApprove] = useState(false);
+  const [error,setError]=useState(false);
+  const [curveReturn, setCurveReturn] = useState(0);
+  const [axelarFee, setAxelarFee] = useState(0);
+  const [expected, setExpected] = useState(0);
+
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+
+  const tokenAddress = "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664";
+  const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
+
+  //const curveContract = "0xB098Fc457ca37222a60feE7CcCDaD12c03662455";
+  const curveAddress = "0xbb8a6436e0E9A22bb7F1dC76aFB4421D8195620E";
+  const curveContract = new ethers.Contract(curveAddress, curveABI, signer);
+
+  useEffect(() => {
+    const connectWallet = async () => {
+      const { chainId } = await provider.getNetwork();
+      console.log(`ChainID = ${chainId}`);
+      setChainID(chainId);
+      if(chainId == 43114)
+        await provider.send("eth_requestAccounts", []);
+    }
+
+    const getBalance = async () => {
+      const balance = await tokenContract.balanceOf(signer.getAddress());
+      console.log(`Balance : ${balance}`);
+      setBalance(ethers.utils.formatUnits(balance.toString(), "mwei"));
+    }
+
+    const getAllowance = async () => {
+        const allowance = await tokenContract.allowance(signer.getAddress(), curveAddress);
+        console.log(`Allowance : ${allowance}`);
+        setAllowance(allowance.toString());
+    }    
+
+    connectWallet()
+      .catch(console.error);
+
+    getBalance()
+      .catch(console.error);
+
+    getAllowance()
+      .catch(console.error);      
+
+  })
+
+  const handleDepositChange = async (e) => {
+    setDepositValue(e.target.value);
+    const curveReturn = await curveContract.get_dy(1, 0, ethers.utils.parseUnits(e.target.value, 6).toString());
+    const tempCurve = ethers.utils.formatUnits(curveReturn.toString(), "mwei");
+    //const finalCurve = tempCurve - (tempCurve / 100);
+    const finalCurve = tempCurve;
+    setCurveReturn(parseFloat(finalCurve).toFixed(2));
+    let response = await fetch('https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=avalanche&destination_chain=terra&amount=' + ethers.utils.parseUnits(e.target.value, 6).toString() + 'uausdc');
+    let responseJson = await response.json();
+    console.log("AxelarFee = ", responseJson.fee.amount);
+    setAxelarFee(parseFloat(ethers.utils.formatUnits(responseJson.fee.amount.toString(), "mwei")).toFixed(2));
+    const expected = finalCurve - ethers.utils.formatUnits(responseJson.fee.amount.toString(), "mwei");
+    setExpected(parseFloat(expected).toFixed(2));
+  }
+
+  const handleDestinationAddressChange = (e) => {
+    setDestinationAddressValue(e.target.value);
+  }  
+
+  const handleDepositAddressChange = (e) => {
+    setDepositAddressValue(e.target.value);
+  }
+
+  const handleMax = async (e) => {
+    e.preventDefault();
+    setDepositValue(balance);
+    let response = await fetch('https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=avalanche&destination_chain=terra&amount=' + ethers.utils.parseUnits(balance, 6).toString() + 'uausdc');
+    let responseJson = await response.json();
+    console.log("AxelarFee = ", responseJson.fee.amount);
+    setAxelarFee(ethers.utils.formatUnits(responseJson.fee.amount.toString(), "mwei"));
+    setExpected(0);
+  }  
+
+  const handleApprove = async (e) => {
+    e.preventDefault();
+    if(depositValue.length == 0 || depositValue == 0 || depositValue > balance)
+    {
+      setError(true)
+    }
+    else
+    {    
+      setApprove(true); 
+      console.log(depositValue);
+      const tokenVal = ethers.utils.parseUnits(depositValue, 6);
+      const result = await tokenContract.approve(curveContract, tokenVal);
+      await result.wait();
+      //const balance = await provider.getBalance(tokenAddress);
+      //const balanceFormatted = ethers.utils.formatEther(balance);
+      setAllowance(depositValue);
+      setDepositValue(0);
+    }
+  }  
+
+  const handleDepositSubmit = async (e) => {
+    e.preventDefault();
+    if(depositValue.length == 0 || depositValue == 0 || depositValue > balance)
+    {
+      setError(true)
+    }
+    else
+    {    
+      console.log(depositValue);
+      const ethValue = ethers.utils.parseEther(depositValue);
+      const depositEth = await tokenContract.deposit({ value: ethValue });
+      await depositEth.wait();
+      const balance = await provider.getBalance(tokenAddress);
+      const balanceFormatted = ethers.utils.formatEther(balance);
+      setBalance(balanceFormatted);
+      setDepositValue(0);
+    }
+  }
+
+  const handleDepositAddressSubmit = async (e) => {
+    setSubmitVal("submitting");
+    e.preventDefault();
+    console.log(depositAddressValue);
+    const sdk = new AxelarAssetTransfer({
+      environment: "testnet",
+      auth: "local",
+    });
+    const result = await sdk.getDepositAddress(
+      "avalanche", // source chain
+      "kujira", // destination chain
+      destinationAddressValue, // destination address
+      "wavax-wei" // asset to transfer
+    );
+    setDepositAddressValue(result);
+    setSubmitVal("done");
+  }
+
+  return (
+    <div className="container">
+      <div className="container">
+          { chainID == "43114" ? <div className='network_correct'>Avalanche Mainnet</div> : <div className='network_wrong'>Wrong Network. Please choose Avalanche mainnet and reload this page.</div> }
+            <div className='forms'>
+            <h3>Crosschain Bridge to Kujira</h3>
+            <p><b>USDC.e Balance:</b> {balance} USDC.e</p>
+            <p><b>Kujira Address:</b> {destinationAddressValue}</p>
+            <p><b>Deposit Address:</b> {depositAddressValue}</p> 
+            <p><b>Deposit Value:</b> {depositValue}</p>
+
+            <p className='fees'><span className='secOne'><b>Expected from Curve:</b> {curveReturn} axlUSDC</span><span className='secTwo'><b>Axelar Fees:</b> {axelarFee} USDC</span></p>
+            <hr></hr>
+            <p className='expected'><b>Expected at Destination:</b> {expected} USDC </p>
+            <p className='note'><b>NOTE:</b> Final amount may vary at Destination</p>
+            <hr></hr>
+
+            <form onSubmit={handleDepositSubmit} >
+              <div className="mb-3">
+
+              {(() => {
+                if (submitVal == "") {
+                  return (  
+                    <div>            
+                        <label>Enter Your Kujira Address:</label>
+                        <input type="text" className="form-control" onChange={handleDestinationAddressChange} value={destinationAddressValue} />
+                    </div>
+                 )
+                }
+              })()}                
+
+                {(() => {
+                  if (submitVal == "") {
+                    return (
+                      <button disabled={(destinationAddressValue.length == 0? true: false)} type="button" onClick={handleDepositAddressSubmit} className="btn btn-success">Generate Deposit Address</button>
+                    )
+                  } else if (submitVal == "submitting") {
+                    return (
+                      <button type="submit" disabled className="btn btn-success"><span className="spinner-border spinner-border-sm mr-1"></span> Generate Deposit Address</button>
+                    )
+                  } else {
+                    return (
+                      <span>Deposit Address Generated.</span>
+                    )
+                  }
+                })()}  
+
+                <label>Enter USDC.e Amount:</label>   
+                <input type="number" className="form-control" onChange={handleDepositChange} placeholder="0" value={depositValue} />
+                {error ? <div className='error'>Please Enter Correct Value</div> : ""}
+                <a href='#' onClick={handleMax} className="max">Max: {balance} USDC.e</a>
+              </div>
+              {(allowance >= balance? <button type="submit" className="btn btn-success">Execute</button>: <button type="button" disabled={approve ? true : false } onClick={handleApprove} className="btn btn-success">Approve</button>)}
+            </form>
+            
+            </div>
+            
+            <div className="instructions">
+              <h3>Instructions</h3>
+              <ul>
+                <ol>1. Enter Your Kujira Address</ol>
+                <ol>2. Click "Generate Deposit Address" button</ol>
+                <ol>3. Enter Amount</ol>
+                <ol>4. Click "Approve" to grant Allowance</ol>
+                <ol>5. Click "Execute" to initiate the Transfer</ol>
+              </ul>
+            </div>
+
+
+          
+          
+
+      </div>
+    </div>
+
+  );
+}
+
+export default Avax_USDC;
