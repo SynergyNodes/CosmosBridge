@@ -14,7 +14,13 @@ return (
 		<NavMenu>
 		<NavLink to="/avalanche" activeStyle>
 			Avalanche
-		</NavLink>		
+		</NavLink>
+		<NavLink to="/polygon" activeStyle>
+			Polygon
+		</NavLink>
+		<NavLink to="/fantom" activeStyle>
+			Fantom
+		</NavLink>			
 		<NavLink to="/contact" activeStyle>
 			Contact Info
 		</NavLink>

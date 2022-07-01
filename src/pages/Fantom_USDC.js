@@ -4,7 +4,7 @@ import { AxelarAssetTransfer } from '@axelar-network/axelarjs-sdk'
 import tokenABI from '../components/abi/tokenABI.json'
 import curveABI from '../components/abi/curveABI.json'
 
-const Avax_USDC = () => {
+const Fantom_USDC = () => {
 
   const [chainID, setChainID] = useState();
   const [allowance, setAllowance] = useState();
@@ -26,11 +26,11 @@ const Avax_USDC = () => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
 
-  const tokenAddress = "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664";
+  const tokenAddress = "0x04068DA6C83AFCFA0e13ba15A6696662335D5B75";
   const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
 
   //const curveContract = "0xB098Fc457ca37222a60feE7CcCDaD12c03662455";
-  const curveAddress = "0xbb8a6436e0E9A22bb7F1dC76aFB4421D8195620E";
+  const curveAddress = "0x261036923F4aAF1322a3173921fCBdaE51352CAe";
   const curveContract = new ethers.Contract(curveAddress, curveABI, signer);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ const Avax_USDC = () => {
       const { chainId } = await provider.getNetwork();
       console.log(`ChainID = ${chainId}`);
       setChainID(chainId);
-      if(chainId == 43114)
+      if(chainId == 250)
       {
         await provider.send("eth_requestAccounts", []);
         getBalance();
@@ -76,7 +76,7 @@ const Avax_USDC = () => {
     const tempCurve = ethers.utils.formatUnits(curveReturn.toString(), "mwei");
     const finalCurve = tempCurve - (tempCurve / 1000);
     setCurveReturn(parseFloat(finalCurve).toFixed(2));
-    let response = await fetch('https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=avalanche&destination_chain=osmosis&amount=' + ethers.utils.parseUnits(e.target.value, 6).toString() + 'uusdc');
+    let response = await fetch('https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=fantom&destination_chain=osmosis&amount=' + ethers.utils.parseUnits(e.target.value, 6).toString() + 'uusdc');
     let responseJson = await response.json();
     let axelarFee = responseJson.fee.amount;
     console.log("AxelarFee = ", axelarFee);
@@ -97,7 +97,7 @@ const Avax_USDC = () => {
   const handleMax = async (e) => {
     e.preventDefault();
     setDepositValue(balance);
-    let response = await fetch('https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=avalanche&destination_chain=osmosis&amount=' + ethers.utils.parseUnits(balance, 6).toString() + 'uusdc');
+    let response = await fetch('https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=fantom&destination_chain=osmosis&amount=' + ethers.utils.parseUnits(balance, 6).toString() + 'uusdc');
     let responseJson = await response.json();
     let axelarFee = responseJson.fee.amount;
     console.log("AxelarFee = ", axelarFee);
@@ -142,7 +142,7 @@ const Avax_USDC = () => {
         const result = await curveContract.exchange(1, 0, dx, min_dy, depositAddressValue);
         await result.wait();
         setSuccess(true);
-        setTxValue('https://snowtrace.io/tx/' + result.hash);
+        setTxValue('https://ftmscan.com/tx/' + result.hash);
         console.log("txValue = ", result.hash);
       } catch (error) {
         console.error(error);
@@ -160,7 +160,7 @@ const Avax_USDC = () => {
       auth: "local",
     });
     const result = await sdk.getDepositAddress(
-      "avalanche", // source chain
+      "fantom", // source chain
       "osmosis", // destination chain
       destinationAddressValue, // destination address
       "uusdc" // asset to transfer
@@ -172,11 +172,11 @@ const Avax_USDC = () => {
   return (
     <div className="container">
       <div className="container">
-          { chainID == "43114" ? <div className='network_correct'>Avalanche Mainnet</div> : <div className='network_wrong'>Wrong Network. Please choose Avalanche mainnet and reload this page.</div> }
+          { chainID == "250" ? <div className='network_correct'>Fantom Mainnet</div> : <div className='network_wrong'>Wrong Network. Please choose Fantom mainnet and reload this page.</div> }
             <div className='forms'>
             <h3>Crosschain Bridge to Kujira</h3>
             <p><b>Your Address:</b> {address}</p>
-            <p><b>USDC.e Balance:</b> {balance} USDC.e</p>
+            <p><b>USDC Balance:</b> {balance} USDC</p>
             <p><b>Kujira Address:</b> {destinationAddressValue}</p>
             <p><b>Deposit Address:</b> {depositAddressValue}</p>
 
@@ -189,7 +189,7 @@ const Avax_USDC = () => {
             { success ? 
               <div className='success'>
                 <p className='head'>Success!</p>
-                <p className='body'><a href={txValue} target="_blank">Click Here for Avalanche Tx Details</a></p>
+                <p className='body'><a href={txValue} target="_blank">Click Here for Fantom Tx Details</a></p>
                 <p className="body">You will received USDC to Your Kujira Wallet in 5 minutes.</p>
                 <hr></hr>              
               </div>
@@ -228,7 +228,7 @@ const Avax_USDC = () => {
                   }
                 })()}  
 
-                <label>Enter USDC.e Amount:</label>   
+                <label>Enter USDC Amount:</label>   
                 <input type="number" className="form-control" onChange={handleDepositChange} placeholder="0" value={depositValue} />
                 {error ? <div className='error'>Please Enter Correct Value</div> : ""}
                 <a href='#' onClick={handleMax} className="max">Max: {balance} USDC.e</a>
@@ -259,4 +259,4 @@ const Avax_USDC = () => {
   );
 }
 
-export default Avax_USDC;
+export default Fantom_USDC;
