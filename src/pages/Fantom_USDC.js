@@ -231,7 +231,7 @@ const Fantom_USDC = () => {
                 <label>Enter USDC Amount:</label>   
                 <input type="number" className="form-control" onChange={handleDepositChange} placeholder="0" value={depositValue} />
                 {error ? <div className='error'>Please Enter Correct Value</div> : ""}
-                <a href='#' onClick={handleMax} className="max">Max: {balance} USDC.e</a>
+                <a href='#' onClick={handleMax} className="max">Max: {balance} USDC</a>
               </div>
               {(allowance >= depositValue? <button type="submit" disabled={execute ? true : false } className="btn btn-success">Execute</button>: <button type="button" disabled={approve ? true : false } onClick={handleApprove} className="btn btn-success">Approve</button>)}
             </form>
