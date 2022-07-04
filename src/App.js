@@ -4,10 +4,11 @@ import Navbar from './components/Navbar';
 import { BrowserRouter as Router, Routes, Route, HashRouter}
 	from 'react-router-dom';
 import Home from './pages';
-import Avalanche from './pages/Avalanche';
-import Polygon from './pages/Polygon';
-import Fantom from './pages/Fantom';
+import Execute from './pages/Execute';
 import Contact from './pages/contact';
+import Fees from './pages/Fees';
+import How_It_Works from './pages/How_It_Works';
+import Execute_ETH from './pages/Execute_ETH';
 
 function App() {
 
@@ -16,9 +17,10 @@ return (
 	<Navbar />
 	<Routes>
 		<Route exact path='/' element={<Home />} />
-		<Route path='/avalanche' element={<Avalanche />} />
-		<Route path='/polygon' element={<Polygon />} />
-		<Route path='/fantom' element={<Fantom />} />
+		<Route path='/execute/:id' element={<Execute />} />
+		<Route path='/execute_eth/:id' element={<Execute_ETH />} />
+		<Route path='/how_it_works' element={<How_It_Works />} />
+		<Route path='/fees' element={<Fees />} />
 		<Route path='/contact' element={<Contact/>} />
 	</Routes>
 	</HashRouter>

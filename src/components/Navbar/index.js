@@ -6,26 +6,9 @@ const Navbar = () => {
 return (
 	<>
 	<div className="header">
-		####### Testing - DO NOT USE ####### <br></br>
-		Crosschain Bridge by SynergyNodes.com
+		CosmosBridge <small class="flow-left">Beta</small> from <img src="../images/SynergyNodes.png"></img>SynergyNodes.com
 		<p>Powered by <a href="https://axelar.network" target="_blank">Axelar</a></p>
 	</div>
-	<Nav>
-		<NavMenu>
-		<NavLink to="/avalanche" activeStyle>
-			Avalanche
-		</NavLink>
-		<NavLink to="/polygon" activeStyle>
-			Polygon
-		</NavLink>
-		<NavLink to="/fantom" activeStyle>
-			Fantom
-		</NavLink>			
-		<NavLink to="/contact" activeStyle>
-			Contact Info
-		</NavLink>
-		</NavMenu>
-	</Nav>
 	</>
 );
 };
