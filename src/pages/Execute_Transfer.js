@@ -17,7 +17,7 @@ const Execute_Transfer = ({ id }) => {
   const denom_name = id.values.denom_name;
   const evmChain = id.values.evmChain;
   const keplrChainID = id.values.keplrChainID;
-  const axelarFeeURL = 'https://axelar-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=' + source + '&destination_chain=' + destination + '&amount=';
+  const axelarFeeURL = 'https://lcd-axelar.synergynodes.com/axelar/nexus/v1beta1/transfer_fee?source_chain=' + source + '&destination_chain=' + destination + '&amount=';
   const evmExplorer = id.values.evmExplorer;
   const source_image = id.values.source_image;
   const destination_image = id.values.destination_image;
