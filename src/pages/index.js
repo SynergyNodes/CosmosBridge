@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 const DropDownContainer = styled("div")`
-  width: 10.5em;
+  width: 100%;
   margin: 0 auto;
 `;
 
