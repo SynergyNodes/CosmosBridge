@@ -147,9 +147,9 @@ const Execute_ETH_Transfer = ({ id }) => {
     {
       setError('Please enter correct value.');
     }
-    else if(depositValue < 10)
+    else if(depositValue < 50)
     {
-      setError('Minimum 10 ' + denom_name + 'required.');
+      setError('Minimum 50 ' + denom_name + ' required.');
     }
     else if(ethers.utils.parseUnits(depositValue, 6).gt(ethers.utils.parseUnits(accbalance, 6)))
     {
