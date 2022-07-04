@@ -51,7 +51,7 @@ const Home = () => {
 	const [isOpenTo, setIsOpenTo] = useState(false);	
 	const [selectedFrom, setSelectedFrom] = useState(null);
 	const [selectedTo, setSelectedTo] = useState(null);
-	const [valueFrom, setValueFrom] = useState('avalanche');
+	const [valueFrom, setValueFrom] = useState('ethereum');
 	const [valueTo, setValueTo] = useState('kujira');
   
 	const togglingFrom = () => setIsOpenFrom(!isOpenFrom);
@@ -89,7 +89,7 @@ const Home = () => {
 		else if(valueFrom === 'fantom' && valueTo === 'osmosis')
 			window.location.assign('/#/execute/FANTOM_OSMO_USDC');
 		else
-			window.location.assign('/#/execute/AVAX_OSMO_USDC');
+			window.location.assign('/#/execute/ETH_OSMO_USDC');
 	}
 
 	return (
@@ -101,7 +101,7 @@ const Home = () => {
 		
 		<DropDownContainer>
 		  <div className="DropDownHeader" onClick={togglingFrom}>
-			{selectedFrom || <span className="yellow"><img src="../images/avalanche.png"></img> Avalanche</span>}
+			{selectedFrom || <span className="yellow"><img src="../images/ethereum.png"></img> Ethereum</span>}
 			<span className="triangle_down1"></span>
 		  </div>
 		  {isOpenFrom && (

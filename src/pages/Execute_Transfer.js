@@ -17,7 +17,7 @@ const Execute_Transfer = ({ id }) => {
   const denom_name = id.values.denom_name;
   const evmChain = id.values.evmChain;
   const keplrChainID = id.values.keplrChainID;
-  const axelarFeeURL = 'https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=' + source + '&destination_chain=' + destination + '&amount=';
+  const axelarFeeURL = 'https://axelar-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=' + source + '&destination_chain=' + destination + '&amount=';
   const evmExplorer = id.values.evmExplorer;
   const source_image = id.values.source_image;
   const destination_image = id.values.destination_image;
@@ -156,7 +156,7 @@ const Execute_Transfer = ({ id }) => {
     let response = await fetch(axelarFeeURL + ethers.utils.parseUnits(e.target.value, 6).toString() + denom);
     let responseJson = await response.json();
     let axelarFee = responseJson.fee.amount;
-    if(axelarFee === 0) axelarFee = 1500000;
+    if(axelarFee == 0) axelarFee = 1500000;
     setAxelarFee(parseFloat(ethers.utils.formatUnits(axelarFee.toString(), "mwei")).toFixed(2));
     const expected = finalCurve - ethers.utils.formatUnits(axelarFee.toString(), "mwei");
     setExpected(parseFloat(expected).toFixed(2));
@@ -184,7 +184,7 @@ const Execute_Transfer = ({ id }) => {
     let response = await fetch(axelarFeeURL + ethers.utils.parseUnits(accbalance, 6).toString() + denom);
     let responseJson = await response.json();
     let axelarFee = responseJson.fee.amount;
-    if(axelarFee === 0) axelarFee = 1500000;
+    if(axelarFee == 0) axelarFee = 1500000;
     setAxelarFee(ethers.utils.formatUnits(axelarFee.toString(), "mwei"));
     const expected = finalCurve - ethers.utils.formatUnits(axelarFee.toString(), "mwei");
     setExpected(parseFloat(expected).toFixed(2));
