@@ -236,7 +236,7 @@ const Execute_ETH_Transfer = ({ id }) => {
               <div className='success'>
                 <p className='head'>Success!</p>
                 <p className='body'><a href={txValue} target="_blank">Click Here for {source_name} Tx Details</a></p>
-                <p className="body">You will received USDC to Your Kujira Wallet in 5 minutes.</p>
+                <p className="body">You will received USDC to Your Kujira Wallet in 20 minutes.</p>
                 <hr></hr>              
               </div>
 
