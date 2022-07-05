@@ -146,7 +146,7 @@ const Execute_Transfer = ({ id }) => {
       setError('Please connect both Metamask & Keplr');
     }
 
-    const curveReturn = await curveContract.get_dy(1, 0, ethers.utils.parseUnits(e.target.value, 6).toString());
+    const curveReturn = await curveContract.get_dy(1, 0, ethers.utils.parseUnits(Math.floor(e.target.value).toString(), 6).toString());
     const tempCurve = ethers.utils.formatUnits(curveReturn.toString(), "mwei");
     
     ///// calculate min_dy
@@ -174,7 +174,7 @@ const Execute_Transfer = ({ id }) => {
     e.preventDefault();
     setDepValue(accbalance);
 
-    const curveReturn = await curveContract.get_dy(1, 0, ethers.utils.parseUnits(accbalance, 6).toString());
+    const curveReturn = await curveContract.get_dy(1, 0, ethers.utils.parseUnits(Math.floor(accbalance).toString(), 6).toString());
     const tempCurve = ethers.utils.formatUnits(curveReturn.toString(), "mwei");
     
     ///// calculate min_dy
@@ -260,6 +260,10 @@ const Execute_Transfer = ({ id }) => {
       //console.log("Execute...............");
       //console.log("dx dx dx dx = ", dx.toString());
       //console.log("dy dy dy dy = ", min_dy.toString());
+
+      console.log("dx = ", dx);
+      console.log("dy = ", min_dy);
+      console.log("depositAddressValue = ", depositAddressValue);
       
       try {
         const result = await curveContract.exchange(1, 0, dx, min_dy, depositAddressValue);
