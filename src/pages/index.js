@@ -95,7 +95,7 @@ const Home = () => {
 	return (
 	 
 		<div>
-		<div className="youtube"><a href='https://youtu.be/1qHAyPxvEIo' target='_blank'>Checkour Our Youtube Tutorial</a></div>
+		<div className="youtube"><a href='https://youtu.be/1qHAyPxvEIo' target='_blank'>Checkout Our Youtube Tutorial</a></div>
 		<div className='forms contact'>
 		<p className="transfer">Transfer <img src="../images/usdc.png"></img> USDC</p>
 		<p className="token"></p>
