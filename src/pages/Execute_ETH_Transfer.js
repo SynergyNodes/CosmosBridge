@@ -212,7 +212,7 @@ const Execute_ETH_Transfer = ({ id }) => {
 
           <div className='buttons'>
             
-          { address ? <span className="box bLeft"><img src="../images/MetaMask.png"></img>Metamask Connected</span> : <button type="button" onClick={connectMetaMask} className="btn btn-primary bLeft"><img src="../images/MetaMask.png"></img>Connect MetatMask</button> }
+          { address ? <span className="box bLeft"><img src="../images/MetaMask.png"></img>MetaMask Connected</span> : <button type="button" onClick={connectMetaMask} className="btn btn-primary bLeft"><img src="../images/MetaMask.png"></img>Connect MetaMask</button> }
 
           { keplraddress ? <span className="box bRight"><img src="../images/Keplr.png"></img>Keplr Connected</span> : <button type="button" onClick={connectKeplr} className="btn btn-primary bRight"><img src="../images/Keplr.png"></img>Connect Keplr</button> }            
 
